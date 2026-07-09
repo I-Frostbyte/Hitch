@@ -1,19 +1,24 @@
-package users
+package main
 
 import (
 	"context"
 	"fmt"
+	"net"
+	// "net/url"
 	"os"
 	"os/signal"
+	"sync"
 	"syscall"
 
-	"github.com/I-Frostbyte/users/users"
+	"github.com/I-Frostbyte/Hitch/users/users"
 	grpc_recovery "github.com/grpc-ecosystem/go-grpc-middleware/recovery"
+
 	// "github.com/jackc/pgx/v5/pgxpool"
+	"github.com/I-Frostbyte/Hitch/protobufs/usersgrpc"
 	"github.com/rs/zerolog"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
-	
+	"github.com/I-Frostbyte/Hitch/users/public/model"
 )
 
 func main() {
@@ -76,7 +81,61 @@ func run(ctx context.Context, logger zerolog.Logger) error {
 	grpcServer := grpc.NewServer(svrOpts...)
 	reflection.Register(grpcServer)
 
-	usersgrpc.RegisterUsersServiceServer(grpcServer, users.NewUsersService(logger))
+	usersgrpc.RegisterUserServiceServer(grpcServer, users.NewUsersService(logger))
 	logger.Info().Msg("Successfully registered UsersServiceServer...")
 
+	listener, err := net.Listen("tcp", fmt.Sprintf(":%d", config.ListenPort))
+	if err != nil {
+		return fmt.Errorf("net.Listen: %w", err)
+	}
+
+	logger.Info().Msgf(`grpc service is listening on port %s`, listener.Addr().String())
+
+	var startupErr error
+	wg := &sync.WaitGroup{}
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		err = grpcServer.Serve(listener)
+		if err != nil {
+			startupErr = fmt.Errorf("error starting gRPC server: %w", err)
+		}
+	}()
+
+	// Do a graceful shutdown if the context is canceled.
+	go func() {
+		<-ctx.Done()
+		logger.Info().Msg("Shutting down gRPC server...")
+		grpcServer.GracefulStop()
+		logger.Info().Msg("gRPC server stopped.")
+	}()
+
+	logger.Info().Msgf(`HTTP server running on %s`, listener.Addr().String())
+
+	// Graceful shutdown logic
+	// wait for the context to finish
+	wg.Wait()
+	logger.Info().Msg("gRPC server has shut down gracefully...")
+
+	return startupErr
 }
+
+/*
+func getPostgresConnectionURL(config model.DBConfig) string {
+	queryValues := url.Values{}
+	if config.TLSDisabled {
+		queryValues.Add("sslmode", "disable")
+	} else {
+		queryValues.Add("sslmode", "require")
+	}
+
+	dbURL := url.URL{
+		Scheme: "postgres",
+		User: url.UserPassword(config.DBUser, config.DBPassword),
+		Host: fmt.Sprintf("%s:%d", config.DBHost, config.DBPort),
+		Path: config.DBName,
+		RawQuery: queryValues.Encode(),
+	}
+	return dbURL.String()
+}
+*/

@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-option go_package = "github.com/I-Frostbyte/Hitch/protobufs/users";
+option go_package = "github.com/I-Frostbyte/Hitch/protobufs/usersgrpc";
 
 package users;
 
@@ -21,11 +21,11 @@ message CreateUserResponse {
     User user = 1;
 }
 
-message GetUserRequest {
+message GetUserByIDRequest {
     string id = 1;
 }
 
-message GetUserResponse {
+message GetUserByIDResponse {
     User user = 1;
 }
 
@@ -42,6 +42,6 @@ message UpdateUserResponse {
 
 service UserService {
     rpc CreateUser (CreateUserRequest) returns (CreateUserResponse);
-    rpc GetUser (GetUserRequest) returns (GetUserResponse);
+    rpc GetUserByID (GetUserByIDRequest) returns (GetUserByIDResponse);
     rpc UpdateUser (UpdateUserRequest) returns (UpdateUserResponse);
 }

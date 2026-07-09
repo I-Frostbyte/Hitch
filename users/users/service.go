@@ -5,7 +5,7 @@ import (
 	// "fmt"
 
 	"github.com/rs/zerolog"
-	"github.com/I-Frostbyte/users/usersgrpc"
+	"github.com/I-Frostbyte/Hitch/protobufs/usersgrpc"
 )
 
 // Impl is the implementation of the UsersServiceServer interface.
@@ -13,8 +13,11 @@ type Impl struct {
 	// repo repo.UsersRepo
 	logger zerolog.Logger
 	// config model.Config
+
+	usersgrpc.UnsafeUserServiceServer
 }
 
+// NewUsersService returns a new instance of the UsersServiceServer implementation.
 func NewUsersService(logger zerolog.Logger) *Impl {
 	return &Impl{
 		logger: logger,
@@ -31,8 +34,4 @@ func (u *Impl) CreateUser(ctx context.Context, req *usersgrpc.CreateUserRequest)
 
 func (u *Impl) UpdateUser(ctx context.Context, req *usersgrpc.UpdateUserRequest) (*usersgrpc.UpdateUserResponse, error) {
 	panic("UpdateUser is not implemented yet")
-}
-
-func (u *Impl) DeleteUser(ctx context.Context, req *usersgrpc.DeleteUserRequest) (*usersgrpc.DeleteUserResponse, error) {
-	panic("DeleteUser is not implemented yet")
 }
