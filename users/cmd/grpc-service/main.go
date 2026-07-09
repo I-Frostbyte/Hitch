@@ -68,8 +68,8 @@ func run(ctx context.Context, logger zerolog.Logger) error {
 	}
 
 	usersRepo := repo.NewUsersRepo(db)
-	
 	*/
+	
 	// First start the gRPC server in a separate goroutine
 	svrOpts := []grpc.ServerOption{
 		grpc.ChainUnaryInterceptor(
@@ -138,4 +138,4 @@ func getPostgresConnectionURL(config model.DBConfig) string {
 	}
 	return dbURL.String()
 }
-*/
+	*/
