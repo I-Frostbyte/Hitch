@@ -4,21 +4,24 @@ import (
 	"context"
 	"fmt"
 	"net"
+	"net/url"
+
 	// "net/url"
 	"os"
 	"os/signal"
 	"sync"
 	"syscall"
 
+	"github.com/I-Frostbyte/Hitch/users/db/repo"
 	"github.com/I-Frostbyte/Hitch/users/users"
 	grpc_recovery "github.com/grpc-ecosystem/go-grpc-middleware/recovery"
 
-	// "github.com/jackc/pgx/v5/pgxpool"
 	"github.com/I-Frostbyte/Hitch/protobufs/usersgrpc"
+	"github.com/I-Frostbyte/Hitch/users/public/model"
+	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/rs/zerolog"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
-	"github.com/I-Frostbyte/Hitch/users/public/model"
 )
 
 func main() {
@@ -52,7 +55,6 @@ func run(ctx context.Context, logger zerolog.Logger) error {
 	}
 	logger = logger.Level(logLevel)
 
-	/*
 	dbConnectionURL := getPostgresConnectionURL(config.DB)
 	db, err := pgxpool.New(ctx, dbConnectionURL)
 	if err != nil {
@@ -68,7 +70,6 @@ func run(ctx context.Context, logger zerolog.Logger) error {
 	}
 
 	usersRepo := repo.NewUsersRepo(db)
-	*/
 	
 	// First start the gRPC server in a separate goroutine
 	svrOpts := []grpc.ServerOption{
@@ -81,7 +82,7 @@ func run(ctx context.Context, logger zerolog.Logger) error {
 	grpcServer := grpc.NewServer(svrOpts...)
 	reflection.Register(grpcServer)
 
-	usersgrpc.RegisterUserServiceServer(grpcServer, users.NewUsersService(logger))
+	usersgrpc.RegisterUserServiceServer(grpcServer, users.NewUsersService(usersRepo, logger, config))
 	logger.Info().Msg("Successfully registered UsersServiceServer...")
 
 	listener, err := net.Listen("tcp", fmt.Sprintf(":%d", config.ListenPort))
@@ -120,7 +121,7 @@ func run(ctx context.Context, logger zerolog.Logger) error {
 	return startupErr
 }
 
-/*
+
 func getPostgresConnectionURL(config model.DBConfig) string {
 	queryValues := url.Values{}
 	if config.TLSDisabled {
@@ -138,4 +139,3 @@ func getPostgresConnectionURL(config model.DBConfig) string {
 	}
 	return dbURL.String()
 }
-	*/

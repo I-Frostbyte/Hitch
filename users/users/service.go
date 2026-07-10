@@ -4,23 +4,31 @@ import (
 	"context"
 	// "fmt"
 
-	"github.com/rs/zerolog"
 	"github.com/I-Frostbyte/Hitch/protobufs/usersgrpc"
+	"github.com/I-Frostbyte/Hitch/users/db/repo"
+	"github.com/I-Frostbyte/Hitch/users/public/model"
+	"github.com/rs/zerolog"
 )
 
 // Impl is the implementation of the UsersServiceServer interface.
 type Impl struct {
-	// repo repo.UsersRepo
+	repo repo.UsersRepo
 	logger zerolog.Logger
-	// config model.Config
+	config model.Config
 
 	usersgrpc.UnsafeUserServiceServer
 }
 
 // NewUsersService returns a new instance of the UsersServiceServer implementation.
-func NewUsersService(logger zerolog.Logger) *Impl {
+func NewUsersService(
+	repo repo.UsersRepo,
+	logger zerolog.Logger,
+	config model.Config,
+	) *Impl {
 	return &Impl{
+		repo: repo,
 		logger: logger,
+		config: config,
 	}
 }
 

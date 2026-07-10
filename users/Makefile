@@ -24,7 +24,11 @@ run:
 	go run ./cmd/grpc-service/...
 
 create-migration:
-	migrate create -ext sql -dir db/migrations $(name)
+	migrate create -seq -ext sql -dir db/migrations $(name)
+
+# 	create-migration-old:
+#   numbering migrations via timestamps:
+# 	migrate create -ext sql -dir db/migrations $(name)
 
 rundb:
 	docker run --name users-postgres -p $(DB_PORT):5432 -e POSTGRES_USER=$(DB_USER) -e POSTGRES_PASSWORD=$(DB_PASSWORD) -e POSTGRES_DB=$(DB_NAME) -d postgres:16-alpine

@@ -12,7 +12,7 @@ CREATE TYPE "identity_document" AS ENUM (
 );
 
 CREATE TABLE "users" (
-    "id" UUID PRIMARY KEY DEFAULT gen_random_uuid()::varchar(36),
+    "id" UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     "status" user_status NOT NULL,
     "username" TEXT NOT NULL,
     "phone_number" TEXT NOT NULL UNIQUE,
