@@ -1,0 +1,34 @@
+name: CI
+
+on:
+  # push:
+  #   paths:
+  #     - 'Exercises/2-Sorting_Exercise_Sorting_Program/**'
+  # pull_request:
+  #   paths:
+  #     - 'Exercises/2-Sorting_Exercise_Sorting_Program/**'
+  #   types: [opened, synchronize, reopened]
+
+jobs:
+ sorting-program-test:
+    name: Sorting Program Tests
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: Exercises/2-Sorting_Exercise_Sorting_Program
+
+    steps:
+    - name: Check out repository code
+      uses: actions/checkout@v4
+    
+    - name: Setup Go
+      uses: actions/setup-go@v5
+      with:
+        go-version: "1.26.5"
+        cache: false
+    
+    - name: Install dependencies
+      run: make install-dependencies
+    
+    - name: Run Tests
+      run: make test
